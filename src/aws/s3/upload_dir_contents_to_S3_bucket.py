@@ -54,8 +54,9 @@ def upload_file_to_s3_bucket(file_path, bucket_name):
     print("Cryptographic hash of [{}] is {}".format(real_path, get_crypto_hash(real_path)))
 
     crypto_hash = get_crypto_hash(real_path)
+    crypto_hash_filename = real_path + ".hash"
     try:
-        with open(real_path + ".hash", "w+") as f:
+        with open(crypto_hash_filename, "w+") as f:
             f.write("{} {}\n".format(filename, crypto_hash))
     except:
         print("ERROR: unable to write crypto hash to file")
@@ -64,6 +65,11 @@ def upload_file_to_s3_bucket(file_path, bucket_name):
     s3_resource.Bucket(bucket_name).upload_file(Filename=real_path, Key=filename)
     s3_resource.Bucket(bucket_name).upload_file(Filename=real_path + ".hash", Key=filename + ".hash")
     print("DONE.")
+
+    try:
+        os.remove(crypto_hash_filename)
+    except:
+        print("ERROR: unable to delete crypto hash file ", crypto_hash_filename)
 
 
 def main(dir_path, s3_bucket_name, is_file):
