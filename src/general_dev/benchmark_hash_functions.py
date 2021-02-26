@@ -1,6 +1,7 @@
 import os
 import sys
 import timeit
+import json
 
 import hashutils
 
@@ -8,33 +9,46 @@ import hashutils
 NDIGITS_ROUNDING = 4
 
 
+previous_hashes = {}
+current_hashes = {}
+
+
 def calculate_hashes_sha1(dir_path):
     for filename in os.listdir(dir_path):
         f = os.path.join(dir_path, filename)
         if os.path.isfile(f):
-            hashutils.computeFileHashSHA1(f)
+            hash_value = hashutils.computeFileHashSHA1(f)
+            current_hashes[filename + "_sha1"] = hash_value
 
 
 def calculate_hashes_sha256(dir_path):
     for filename in os.listdir(dir_path):
         f = os.path.join(dir_path, filename)
         if os.path.isfile(f):
-            hashutils.computeFileHashSHA256(f)
+            hash_value = hashutils.computeFileHashSHA256(f)
+            current_hashes[filename + "_sha256"] = hash_value
 
 
 def calculate_hashes_sha512(dir_path):
     for filename in os.listdir(dir_path):
         f = os.path.join(dir_path, filename)
         if os.path.isfile(f):
-            hashutils.computeFileHashSHA512(f)
+            hash_value = hashutils.computeFileHashSHA512(f)
+            current_hashes[filename + "_sha512"] = hash_value
 
 
 def calculate_hashes_blake2b(dir_path):
     for filename in os.listdir(dir_path):
         f = os.path.join(dir_path, filename)
         if os.path.isfile(f):
-            hashutils.computeFileHashBlake2b(f)
+            hash_value = hashutils.computeFileHashBlake2b(f)
+            current_hashes[filename + "_blake2b"] = hash_value
 
+
+def write_hash_values(hashes_dict, dir_path, hash_filename):
+        output_filename = os.path.join(dir_path, hash_filename)
+        with open(output_filename, 'w') as of:
+            of.write(json.dumps(hashes_dict)) # use `json.loads` to do the reverse
 
 
 if __name__ == '__main__':
@@ -63,3 +77,5 @@ if __name__ == '__main__':
     calculate_hashes_blake2b(dir_path)
     end_time = timeit.default_timer()
     print("Total time to calculate Blake2b hashes: {0} seconds".format(round(end_time - start_time, NDIGITS_ROUNDING)))
+
+    #write_hash_values(current_hashes, dir_path, "all_hashes.txt")
