@@ -47,3 +47,13 @@ def computeFileHashBlake2b(file_path):
             hasher.update(chunk)
 
     return hasher.hexdigest()
+
+
+def computeFileHashSHA3_256(file_path):
+    hasher = hashlib.sha3_256()
+
+    with open(file_path, 'rb') as f:
+        while chunk := f.read(BLOCK_SIZE):
+            hasher.update(chunk)
+
+    return hasher.hexdigest()
