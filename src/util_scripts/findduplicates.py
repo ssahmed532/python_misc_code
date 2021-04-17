@@ -14,6 +14,11 @@ import hashutils
 #       https://stackoverflow.com/questions/14996453/python-libraries-to-calculate-human-readable-filesize-from-bytes
 #
 
+# This script requires the following packages to be installed before it can be
+# used:
+#   pip install tqdm
+#   pip install pefile
+# 
 
 #
 # TODO:
