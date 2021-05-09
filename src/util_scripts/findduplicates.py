@@ -76,6 +76,8 @@ if __name__ == '__main__':
 
     filesList = []
 
+    beginTime = timer()
+
     startTime = timer()
     logging.info('Building files list ...')
     for dir in dirsList:
@@ -121,8 +123,12 @@ if __name__ == '__main__':
             pprint.pprint(filesList, width=maxWidth*1.333)
             print()
 
+    finishTime = timer()
+
     if duplicates > 0:
         logging.info('Found {} duplicate files in {} seconds'.format(duplicates, elapsedTime))
         logging.info('Total disk space occupied by duplicate files: {}'.format(humansize(duplicatesDiskSpace)))
     else:
         logging.info('No duplicates found')
+
+    logging.info('Total elapsed time:  {} seconds'.format(round(finishTime - beginTime), 5))
