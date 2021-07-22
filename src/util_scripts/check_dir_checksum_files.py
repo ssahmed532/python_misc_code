@@ -70,7 +70,15 @@ if __name__ == '__main__':
     print("Number of directories with checksum files: {}".format(count_dirs_with_checksums))
     print("Number of directories without checksum files: {}".format(count_dirs_without_checksums))
     print()
-    print(' '.join(dirs_without_checksums))
+
+    if (count_dirs_without_checksums == 0):
+        assert (count_dirs_with_checksums == count_dirs)
+        assert not dirs_without_checksums
+        print("All checksums appear to be up-to-date")
+        sys.exit(0)
+
+    if (count_dirs_without_checksums > 0):
+        print(' '.join(dirs_without_checksums))
 
     if compute_checksums and (len(dirs_without_checksums) > 0):
         count_computed_checksums = 0
