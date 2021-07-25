@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
     endTime = timer()
     elapsedTime = round(endTime - startTime, 5)
-    logging.info('{} files found in {} seconds'.format(len(filesList), elapsedTime))
+    logging.info(f'{len(filesList)} files found in {elapsedTime} seconds')
 
     fileHashDict = defaultdict(list)
     # number of duplicates detected
@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
             fileHashDict[fileHash].append(file)
         except (PermissionError, FileNotFoundError):
-            logging.error('Skipping file {} due to permissions and/or access issues'.format(file))
+            logging.error(f'Skipping file {file} due to permissions and/or access issues')
     print()
 
     endTime = timer()
@@ -114,7 +114,7 @@ if __name__ == '__main__':
         if len(filesList) > 1:
             duplicates += len(filesList) - 1
             duplicatesDiskSpace += calcDuplicatesDiskSpace(filesList)
-            print('{} hash for {} different files:'.format(fileHash, len(filesList)))
+            print(f'{fileHash} hash for {len(filesList)} different files:')
 
             # determine the max width to set for pretty printing
             # based on the max. file path length for each list of
@@ -126,9 +126,9 @@ if __name__ == '__main__':
     finishTime = timer()
 
     if duplicates > 0:
-        logging.info('Found {} duplicate files in {} seconds'.format(duplicates, elapsedTime))
-        logging.info('Total disk space occupied by duplicate files: {}'.format(humansize(duplicatesDiskSpace)))
+        logging.info(f'Found {duplicates} duplicate files in {elapsedTime} seconds')
+        logging.info(f'Total disk space occupied by duplicate files: {humansize(duplicatesDiskSpace)}')
     else:
         logging.info('No duplicates found')
 
-    logging.info('Total elapsed time:  {} seconds'.format(round(finishTime - beginTime), 5))
+    logging.info(f'Total elapsed time:  {round((finishTime - beginTime), 5)} seconds')
