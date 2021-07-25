@@ -3,6 +3,7 @@
 #
 # Based on sample code from the following articles:
 #   - https://www.geeksforgeeks.org/extract-all-the-urls-from-the-webpage-using-python/
+#   - https://www.thepythoncode.com/article/extract-all-website-links-python
 #
 # Requires:
 #   - bs4
