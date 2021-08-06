@@ -94,4 +94,5 @@ if __name__ == '__main__':
     end_time = timeit.default_timer()
     print("Total time to calculate SHA3-256 hashes: {0} seconds".format(round(end_time - start_time, NDIGITS_ROUNDING)))
 
-    #write_hash_values(current_hashes, dir_path, "all_hashes.txt")
+    dir_name =  os.path.basename(os.path.normpath(dir_path))
+    write_hash_values(current_hashes, dir_path, dir_name + "_all_hashes.txt")
