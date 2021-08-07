@@ -58,7 +58,13 @@ def match_by_filename(filename, keyword):
     Returns:
         Boolean: True if the filename is matched against the keyword
     """
-    return (keyword in filename)
+
+    #   Only match the last filename portion of filename.
+    #   For example, if filename is "D:\eBooks_repo\EBOOKS\NLP\Natural Language Processing with TensorFlow.rar",
+    #   check the keyword in the filename portion ("Natural Language Processing with TensorFlow.rar")
+    #   only and not in the entire file path string
+    #
+    return (keyword in os.path.basename(filename))
 
 
 def match_by_contents(filename, keyword):
@@ -85,14 +91,8 @@ def match_by_contents(filename, keyword):
     return matching_files
 
 
-if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print(f'Usage: python {os.path.basename(sys.argv[0])} </path/to/directory containing archive files> <keyword>', file=sys.stderr)
-        sys.exit(1)
 
-    dir_path = sys.argv[1]
-    keyword = sys.argv[2]
-
+def find_matching_archives(dir_path, keyword):
     files_list = []
     startTime = timer()
     files_list = fileutils.getAllFilesRecursive(dir_path)
@@ -120,3 +120,11 @@ if __name__ == "__main__":
         print(f'Filename: {filename}')
         pprint(matched_files[filename])
         print()
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print(f'Usage: python {os.path.basename(sys.argv[0])} </path/to/directory containing archive files> <keyword>', file=sys.stderr)
+        sys.exit(1)
+
+    find_matching_archives(dir_path=sys.argv[1], keyword=sys.argv[2])
