@@ -87,9 +87,11 @@ def match_by_contents(filename, keyword):
     except rarfile.NeedFirstVolume as nfve:
         print(f'ERROR: unable to check a split / multi-volume RAR file: {filename}', file=sys.stderr)
         print(nfve)
+    except rarfile.NotRarFile as nrfe:
+        print(f'ERROR: {filename} is not a RAR archive', file=sys.stderr)
+        print(nrfe)
 
     return matching_files
-
 
 
 def find_matching_archives(dir_path, keyword):
