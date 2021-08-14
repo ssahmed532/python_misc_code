@@ -16,9 +16,14 @@
 #           (do the following steps in a cygwin shell)
 #           cd /tmp
 #           wget http://www.rarlab.com/rar/unrarsrc-5.1.7.tar.gz
+#           ***OR***
+#           https://www.rarlab.com/rar/unrarsrc-6.0.7.tar.gz
 #           tar -xzvf unrarsrc-5.1.7.tar.gz
+#           ***OR***
+#           tar -xzvf unrarsrc-6.0.7.tar.gz
 #           cd unrar
 #           make all
+#           make install
 #           cp unrar.exe /bin/
 #
 #       - After the steps above, unrar.exe is going to be present in
