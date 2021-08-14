@@ -75,9 +75,16 @@ def match_by_contents(filename, keyword):
         keyword (string): keyword to match against
 
     Returns:
-        Boolean: True if any of the files inside the archive file are matched (by filename) against the keyword
+        List: a list of matching filenames found inside the archive file
+        that matched the given keyword
     """
+
     matching_files = []
+
+    # TODO
+    #   improve error handling
+    #   propagate exceptions to calling function/code
+    #
 
     try:
         with rarfile.RarFile(filename) as archive:
@@ -90,6 +97,9 @@ def match_by_contents(filename, keyword):
     except rarfile.NotRarFile as nrfe:
         print(f'ERROR: {filename} is not a RAR archive', file=sys.stderr)
         print(nrfe)
+    except rarfile.RarCannotExec as rcee:
+        print(f'ERROR: Unable to extract archive {filename} due to missing unrar tool', file=sys.stderr)
+        print(rcee)
 
     return matching_files
 
