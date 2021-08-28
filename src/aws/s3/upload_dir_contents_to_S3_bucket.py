@@ -21,6 +21,8 @@ import s3_utils
 #   - add an option to recurse into all sub-directories when uploading files. If not specified,
 #     only upload those files in the root of the specified directory.
 #   - add an option to skip (cryptographic) hash generation
+#   - add an option to only upload a certain type of files (e.g. only PDFs, only .txt files, etc)
+#   - add total elapsed time logging
 #
 
 
@@ -72,43 +74,36 @@ def _upload_file_to_s3_bucket(s3_resource, file_path: str, bucket_name: str, cal
     return success
 
 
-def upload_dir_contents_to_s3_bucket(dir_path: str, bucket_name: str) -> None:
+def upload_dir_contents_to_s3_bucket(s3_resource, dir_path: str, bucket_name: str) -> int:
     files_uploaded = 0
 
-    s3_resource = boto3.resource('s3')
-
-    # TODO: move this bucket existence check outside this function
-    bucket_exists = s3_utils.check_bucket(s3_resource, bucket_name)
-    if not bucket_exists:
-        print(f'ERROR: cannot upload files to non-existent bucket ({bucket_name})')
-    else:
-        # now that we know that the bucket exists, iterate over all files in
-        # the specified directory and upload them to this S3 bucket
-        for subdir, dirs, files in os.walk(dir_path):
-            for filename in files:
-                file_path = subdir + os.sep + filename
-                _upload_file_to_s3_bucket(s3_resource, file_path, bucket_name, True)
-                files_uploaded += 1
+    # Iterate over all files in the specified directory and upload them
+    # to this S3 bucket
+    # TODO: replace os.walk() with os.scandir()
+    for subdir, dirs, files in os.walk(dir_path):
+        for filename in files:
+            file_path = subdir + os.sep + filename
+            _upload_file_to_s3_bucket(s3_resource, file_path, bucket_name, True)
+            files_uploaded += 1
 
     return files_uploaded
 
 
-def upload_file_to_s3_bucket(file_path: str, bucket_name: str) -> None:
-    s3_resource = boto3.resource('s3')
-
-    # TODO: move this bucket existence check outside this function
-    if s3_utils.check_bucket(s3_resource, bucket_name):
-        _upload_file_to_s3_bucket(s3_resource, file_path, bucket_name, True)
-    else:
-        print(f'ERROR: cannot upload files to non-existent bucket ({bucket_name})')
+def upload_file_to_s3_bucket(s3_resource, file_path: str, bucket_name: str) -> None:
+    _upload_file_to_s3_bucket(s3_resource, file_path, bucket_name, True)
 
 
 def main(dir_path: str, s3_bucket_name: str, is_file: bool) -> None:
-    if is_file:
-        upload_file_to_s3_bucket(dir_path, s3_bucket_name)
+    s3_resource = boto3.resource('s3')
+
+    if not s3_utils.check_bucket(s3_resource, s3_bucket_name):
+        print(f'ERROR: cannot upload file(s) to non-existent S3 bucket ({s3_bucket_name})')
     else:
-        files_uploaded = upload_dir_contents_to_s3_bucket(dir_path, s3_bucket_name)
-        print(f'{files_uploaded} files uploaded successfully')
+        if is_file:
+            upload_file_to_s3_bucket(s3_resource, dir_path, s3_bucket_name)
+        else:
+            files_uploaded = upload_dir_contents_to_s3_bucket(s3_resource, dir_path, s3_bucket_name)
+            print(f'{files_uploaded} files uploaded successfully')
 
 
 if __name__ == "__main__":
