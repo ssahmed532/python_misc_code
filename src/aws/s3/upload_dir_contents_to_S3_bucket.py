@@ -3,10 +3,25 @@ import os
 import sys
 import hashlib
 
+from botocore.retries import bucket
+
 import s3_utils
 
-PDF_EXT = '.pdf'
-
+# TODO
+#   - convert this into a Class
+#   - integrate the argparse module
+#   - integrate the Python std logging module, and log all output to
+#     an ondisk logfile
+#   - add an option for auto-creating an S3 bucket based on a user-specified
+#     bucket prefix
+#   - when uploading the contents of an entire directory, generate a manifest
+#     file that lists all of the files and their respective hashes
+#   - prompt when a file with the same key already exists in the target bucket
+#   - add a verbose mode
+#   - add an option to recurse into all sub-directories when uploading files. If not specified,
+#     only upload those files in the root of the specified directory.
+#   - add an option to skip (cryptographic) hash generation
+#
 
 
 def get_crypto_hash(file_path: str) -> str:
@@ -21,21 +36,22 @@ def get_crypto_hash(file_path: str) -> str:
     return file_hash
 
 
-
-
 def _upload_file_to_s3_bucket(s3_resource, file_path: str, bucket_name: str, calc_hash: bool) -> bool:
     success = True
 
     real_path = os.path.realpath(file_path)
     filename = os.path.basename(real_path)
 
-    print(f'Uploading file [{real_path}] to bucket [{bucket_name}] ... ', end='')
+    print(f'Uploading file [{filename}] to S3 bucket [{bucket_name}] ... ', end='')
     s3_resource.Bucket(bucket_name).upload_file(Filename=real_path, Key=filename)
     print('OK.')
 
     if calc_hash:
         file_hash = get_crypto_hash(real_path)
-        print(f'Integrity hash of [{real_path}] is {file_hash}')
+
+        # TODO
+        # the following line should only be printed when in verbose mode
+        #print(f'[{filename}] -> {file_hash}')
 
         file_hash_filename = real_path + ".hash"
         try:
@@ -57,27 +73,30 @@ def _upload_file_to_s3_bucket(s3_resource, file_path: str, bucket_name: str, cal
 
 
 def upload_dir_contents_to_s3_bucket(dir_path: str, bucket_name: str) -> None:
+    files_uploaded = 0
+
     s3_resource = boto3.resource('s3')
 
+    # TODO: move this bucket existence check outside this function
     bucket_exists = s3_utils.check_bucket(s3_resource, bucket_name)
     if not bucket_exists:
-        print("ERROR: cannot upload files to non-existent bucket ({})".format(bucket_name))
-        return
-    
-    # now that we know that the bucket exists, iterate over all files in
-    # the specified directory and upload them to this S3 bucket
-    for subdir, dirs, files in os.walk(dir_path):
-        for filename in files:
-            filepath = subdir + os.sep + filename
+        print(f'ERROR: cannot upload files to non-existent bucket ({bucket_name})')
+    else:
+        # now that we know that the bucket exists, iterate over all files in
+        # the specified directory and upload them to this S3 bucket
+        for subdir, dirs, files in os.walk(dir_path):
+            for filename in files:
+                file_path = subdir + os.sep + filename
+                _upload_file_to_s3_bucket(s3_resource, file_path, bucket_name, True)
+                files_uploaded += 1
 
-            if filepath.endswith(PDF_EXT):
-                print(filepath)
-                s3_resource.Bucket(bucket_name).upload_file(Filename=filepath, Key=filename)
+    return files_uploaded
 
 
 def upload_file_to_s3_bucket(file_path: str, bucket_name: str) -> None:
     s3_resource = boto3.resource('s3')
 
+    # TODO: move this bucket existence check outside this function
     if s3_utils.check_bucket(s3_resource, bucket_name):
         _upload_file_to_s3_bucket(s3_resource, file_path, bucket_name, True)
     else:
@@ -88,7 +107,8 @@ def main(dir_path: str, s3_bucket_name: str, is_file: bool) -> None:
     if is_file:
         upload_file_to_s3_bucket(dir_path, s3_bucket_name)
     else:
-        upload_dir_contents_to_s3_bucket(dir_path, s3_bucket_name)
+        files_uploaded = upload_dir_contents_to_s3_bucket(dir_path, s3_bucket_name)
+        print(f'{files_uploaded} files uploaded successfully')
 
 
 if __name__ == "__main__":
