@@ -3,6 +3,7 @@ import os
 import sys
 import hashlib
 
+from tqdm import tqdm
 from botocore.retries import bucket
 
 import s3_utils
@@ -44,15 +45,12 @@ def _upload_file_to_s3_bucket(s3_resource, file_path: str, bucket_name: str, cal
     real_path = os.path.realpath(file_path)
     filename = os.path.basename(real_path)
 
-    print(f'Uploading file [{filename}] to S3 bucket [{bucket_name}] ... ', end='')
     s3_resource.Bucket(bucket_name).upload_file(Filename=real_path, Key=filename)
-    print('OK.')
 
     if calc_hash:
         file_hash = get_crypto_hash(real_path)
 
-        # TODO
-        # the following line should only be printed when in verbose mode
+        # TODO: the following line should only be printed when in verbose mode
         #print(f'[{filename}] -> {file_hash}')
 
         file_hash_filename = real_path + ".hash"
@@ -64,8 +62,7 @@ def _upload_file_to_s3_bucket(s3_resource, file_path: str, bucket_name: str, cal
         except:
             print(f'ERROR: unable to write integrity hash to file {file_hash_filename}')
 
-        # TODO
-        # move this file deletion step to the above try ... except block
+        # TODO: move this file deletion step to the above try ... except block
         try:
             os.remove(file_hash_filename)
         except:
@@ -81,10 +78,11 @@ def upload_dir_contents_to_s3_bucket(s3_resource, dir_path: str, bucket_name: st
     # to this S3 bucket
     # TODO: replace os.walk() with os.scandir()
     for subdir, dirs, files in os.walk(dir_path):
-        for filename in files:
+        for filename in (progress_bar := tqdm(files, desc='Uploading files')):
             file_path = subdir + os.sep + filename
             _upload_file_to_s3_bucket(s3_resource, file_path, bucket_name, True)
             files_uploaded += 1
+            progress_bar.write(filename)
 
     return files_uploaded
 
