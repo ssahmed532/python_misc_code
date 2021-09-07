@@ -6,7 +6,6 @@ import hashlib
 from datetime import timedelta
 from timeit import default_timer as timer
 from tqdm import tqdm
-from botocore.retries import bucket
 
 import s3_utils
 
