@@ -14,9 +14,13 @@ if __name__ == "__main__":
     """A simple script to find all files in a specified path that
        were modified between a specific date range.
     """
-    files = os.listdir(DIR_PATH)
+    dir_path = DIR_PATH
+    if len(sys.argv) == 2:
+        dir_path = sys.argv[1]
+
+    files = os.listdir(dir_path)
     for f in files:
-        full_path = os.path.join(DIR_PATH, f)
+        full_path = os.path.join(dir_path, f)
 
         statinfo = os.stat(full_path)
 
