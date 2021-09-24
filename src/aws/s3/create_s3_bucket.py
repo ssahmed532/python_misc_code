@@ -1,17 +1,26 @@
 import boto3
 import uuid
 import pprint
+import sys
+
+
+DEFAULT_BUCKET_PREFIX = 'ssahmed'
 
 
 def get_new_bucket_name(bucket_prefix):
     return '-'.join([bucket_prefix, str(uuid.uuid4())])
 
 
-def create_bucket(bucket_prefix, s3_resource):
+def create_bucket(bucket_name: str, s3_resource):
     session = boto3.session.Session()
     current_region = session.region_name
-    print(current_region)
-    bucket_name = get_new_bucket_name(bucket_prefix)
+
+    if not bucket_name:
+        # if the bucket name is not specified then auto-generate one
+        bucket_name = get_new_bucket_name(DEFAULT_BUCKET_PREFIX)
+        print(f'Auto-generated bucket name is: \"{bucket_name}\"')
+
+    print(f'Creating new bucket \"{bucket_name}\" in region \"{current_region}\"')
 
     s3_connection = s3_resource.meta.client
 
@@ -38,24 +47,45 @@ def create_bucket(bucket_prefix, s3_resource):
         })
 
     if response['ResponseMetadata']['HTTPStatusCode'] == 200:
-        print('Server-side Encryption successfully enabled for bucket')
+        print(f'Server-side Encryption successfully enabled for bucket {bucket_name}')
     else:
-        print('WARNING: failed to enable Server-side Encryption for bucket: ' + bucket_name)
+        print(f'WARNING: failed to enable Server-side Encryption for bucket {bucket_name}')
         pprint.pprint(response, width=1)
 
-    print(bucket_name, current_region)
     return bucket_name, bucket_response
 
 
-def main():
+def main(s3_bucket_name: str) -> None:
     s3_resource = boto3.resource('s3')
 
-    s3_bucket_name, create_bucket_response = create_bucket('ssahmed', s3_resource)
+    s3_bucket_name, create_bucket_response = create_bucket(s3_bucket_name, s3_resource)
+
+    if create_bucket_response['ResponseMetadata']['HTTPStatusCode'] == 200:
+        print('S3 bucket created successfully')
 
     print("Name of newly created S3 bucket: " + s3_bucket_name)
-    print("create_bucket response:" )
-    pprint.pprint(create_bucket_response, width=1)
+
+    # TODO
+    #   add a --verbose flag that prints out the full create_bucket response
+    #print("create_bucket response:" )
+    #pprint.pprint(create_bucket_response, width=1)
+
+
+def print_usage_and_exit() -> None:
+    print(f'Usage: {sys.argv[0]} [S3 bucket name]', file=sys.stderr)
+    sys.exit(1)
 
 
 if __name__ == "__main__":
-    main()
+    s3_bucket_name = None
+
+    arg_count = len(sys.argv)
+    if arg_count == 2:
+        if sys.argv[1] == '--help':
+            print_usage_and_exit()
+        else:
+            s3_bucket_name = sys.argv[1]
+    elif arg_count > 2:
+        print_usage_and_exit()
+
+    main(s3_bucket_name)
