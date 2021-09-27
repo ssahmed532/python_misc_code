@@ -1,12 +1,12 @@
 import boto3
 import os
 import sys
-import hashlib
 
 from datetime import timedelta
 from timeit import default_timer as timer
 from tqdm import tqdm
 
+import hash_utils
 import s3_utils
 
 # TODO
@@ -26,18 +26,6 @@ import s3_utils
 #   - [DONE] convert this into a Class
 #   - [DONE] add total elapsed time logging
 #
-
-
-def get_crypto_hash(file_path: str) -> str:
-    file_hash = ""
-
-    with open(file_path, "rb") as f:
-        hash_algo = hashlib.blake2b()
-        while chunk := f.read(8192):
-            hash_algo.update(chunk)
-
-    file_hash = hash_algo.hexdigest()
-    return file_hash
 
 
 class S3FileUploader:
@@ -77,25 +65,14 @@ class S3FileUploader:
         self.s3_resource.Bucket(self.bucket_name).upload_file(Filename=real_path, Key=filename)
 
         if calc_hash:
-            file_hash = get_crypto_hash(real_path)
+            hash_filepath = hash_utils.create_integrity_hash_file(file_path)
 
-            # TODO: the following line should only be printed when in verbose mode
-            #print(f'[{filename}] -> {file_hash}')
+            self.s3_resource.Bucket(self.bucket_name).upload_file(Filename=real_path + ".hash", Key=filename + ".hash")
 
-            file_hash_filename = real_path + ".hash"
             try:
-                with open(file_hash_filename, "w+") as f:
-                    f.write("{} {}\n".format(filename, file_hash))
-
-                self.s3_resource.Bucket(self.bucket_name).upload_file(Filename=real_path + ".hash", Key=filename + ".hash")
+                os.remove(hash_filepath)
             except:
-                print(f'ERROR: unable to write integrity hash to file {file_hash_filename}')
-
-            # TODO: move this file deletion step to the above try ... except block
-            try:
-                os.remove(file_hash_filename)
-            except:
-                print(f'ERROR: unable to delete crypto hash file {file_hash_filename}')
+                print(f'ERROR: unable to delete integrity hash file {hash_filepath}')
 
         return success
 
