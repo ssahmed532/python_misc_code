@@ -28,6 +28,14 @@ import s3_utils
 #
 
 
+class NonExistentS3BucketError(Exception):
+    """Raised when a specific, named S3 Bucket does not exist"""
+    def __init__(self, bucket_name: str):
+        self.bucket_name = bucket_name
+        self.message = 'S3 Bucket does not exist'
+        super().__init__(self.message)
+
+
 class S3FileUploader:
     """A utility class to upload files to an existing S3 Bucket
     """
@@ -41,8 +49,7 @@ class S3FileUploader:
         resource = boto3.resource('s3')
 
         if not s3_utils.check_bucket(resource, self.bucket_name):
-            # TODO: raise an appropriate Exception here
-            print(f'ERROR: cannot upload file(s) to non-existent S3 bucket ({self.bucket_name})')
+            raise NonExistentS3BucketError(self.bucket_name)
         else:
             self.s3_resource = resource
 
@@ -112,7 +119,11 @@ class S3FileUploader:
 
 def main(dir_path: str, s3_bucket_name: str, is_file: bool) -> None:
     file_uploader = S3FileUploader(s3_bucket_name)
-    file_uploader.initialize()
+    try:
+        file_uploader.initialize()
+    except NonExistentS3BucketError as e:
+        print(f'ERROR: cannot upload file(s) to non-existent S3 bucket ({s3_bucket_name})', file=sys.stderr)
+        sys.exit(1)
 
     start = timer()
     if is_file:

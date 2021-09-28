@@ -10,7 +10,6 @@ def check_bucket(s3_resource: ServiceResource, bucket_name: str) -> bool:
         s3_resource.meta.client.head_bucket(Bucket=bucket_name)
         return True
     except botocore.exceptions.ClientError as e:
-        print("Bucket named {} does NOT exist".format(bucket_name))
         return False
 
 
