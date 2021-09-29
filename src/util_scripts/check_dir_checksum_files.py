@@ -14,7 +14,6 @@ SHA1_EXT = ".sha1"
 #   is "out of date" with respect to the contents of that folder.
 
 
-
 def calculate_checksums(dir_path):
     program = "C:\\Windows\\cfv.bat"
     result = subprocess.run([program, "-C", "-rr", "-t", "sha1"], cwd=dir_path)
@@ -32,6 +31,7 @@ if __name__ == '__main__':
         print_usage()
         sys.exit(1)
 
+    verbose = False
     compute_checksums = False
 
     if (len(sys.argv) == 3) and sys.argv[2].lower() == "--calculate-checksums":
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     dir_path = os.path.abspath(sys.argv[1])
 
-    print("Checking all sub-directories in root dir path: " + dir_path)
+    print(f'Checking all sub-directories in root dir path: {dir_path} ...')
 
     dirs_without_checksums = []
     count_dirs_with_checksums = 0
@@ -56,10 +56,11 @@ if __name__ == '__main__':
                 sha1_checksum_filepath = os.path.join(entry.path, entry.name) + SHA1_EXT
                 # print("***: " + sha1_checksum_filepath)
                 if os.path.exists(sha1_checksum_filepath):
-                    print("++++++ Found SHA1 checksum file for dir: " + entry.name)
+                    if verbose:
+                        print(f'++++++ Found SHA1 checksum file for dir: {entry.name}')
                     count_dirs_with_checksums += 1
                 else:
-                    print("WARNING: SHA1 checksum file doesn't exist for dir: " + entry.name)
+                    print(f"WARNING: SHA1 checksum file doesn't exist for dir: {entry.name}")
                     count_dirs_without_checksums += 1
                     dirs_without_checksums.append(entry.path)
 
@@ -67,8 +68,8 @@ if __name__ == '__main__':
         print('ERROR: No sub-directories found', file=sys.stderr)
         sys.exit(1)
 
-    print("Number of directories with checksum files: {}".format(count_dirs_with_checksums))
-    print("Number of directories without checksum files: {}".format(count_dirs_without_checksums))
+    print(f'Number of directories with checksum files: {count_dirs_with_checksums}')
+    print(f'Number of directories without checksum files: {count_dirs_without_checksums}')
     print()
 
     if (count_dirs_without_checksums == 0):
@@ -77,14 +78,11 @@ if __name__ == '__main__':
         print("All checksums appear to be up-to-date")
         sys.exit(0)
 
-    if (count_dirs_without_checksums > 0):
-        print(' '.join(dirs_without_checksums))
-
     if compute_checksums and (len(dirs_without_checksums) > 0):
         count_computed_checksums = 0
-        print("Computing checksums in {} directories ...".format(len(dirs_without_checksums)))
+        print(f'Computing checksums in {len(dirs_without_checksums)} directories ...')
         for dir_path in dirs_without_checksums:
             calculate_checksums(dir_path)
             count_computed_checksums += 1
         
-        print("Computed dir checksums for {0} directories".format(count_computed_checksums))
+        print(f'Computed dir checksums for {count_computed_checksums} directories')
