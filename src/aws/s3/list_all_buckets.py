@@ -1,10 +1,16 @@
 import argparse
 import boto3
+import sys
 import uuid
 from pprint import pprint
+from botocore.exceptions import NoCredentialsError
 
 
-def list_all_buckets(verbose: bool) -> None:
+def list_all_s3_buckets(verbose: bool) -> None:
+    """List all S3 buckets associated with the current AWS credentials
+       and Region, and print to stdout.
+    """
+
     if verbose:
         print(f'boto3 library version is {boto3.__version__}')
         print()
@@ -40,4 +46,7 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
 
-    list_all_buckets(args.verbose)
+    try:
+        list_all_s3_buckets(args.verbose)
+    except NoCredentialsError as e:
+        print(f'ERROR: Unable to locate AWS credentials or credentials have been setup incorrectly', file=sys.stderr)
