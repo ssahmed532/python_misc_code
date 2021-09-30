@@ -13,6 +13,7 @@ def list_all_s3_buckets(verbose: bool) -> None:
 
     if verbose:
         print(f'boto3 library version is {boto3.__version__}')
+        print(f'Current region is {boto3.Session().region_name}')
         print()
 
     # Retrieve the list of existing buckets
