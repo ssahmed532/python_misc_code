@@ -27,13 +27,13 @@ from commons import NonExistentS3BucketError
 
 
 class S3FileDownloader:
-    """A utility class to download files from an S3 Bucket
-    """
+    """A utility class to download files from an S3 Bucket"""
 
     def __init__(self, bucket_name: str) -> None:
         self.bucket_name = bucket_name
         self.s3_resource = None
         self.hash_files = []
+
 
     def initialize(self) -> None:
         resource = boto3.resource('s3')
@@ -43,15 +43,16 @@ class S3FileDownloader:
 
         self.s3_resource = resource
 
-    def download_all_files(self) -> int:
+
+    def _download_all_files(self, dir_path: str) -> int:
         files_downloaded = 0
 
         bucket_files = s3_utils.get_bucket_contents(self.s3_resource, self.bucket_name)
 
-        os.mkdir(self.bucket_name)
+        os.mkdir(dir_path)
 
         for file in (progress_bar := tqdm(bucket_files, desc='Downloading files')):
-            full_file_path = os.path.join(self.bucket_name, file)
+            full_file_path = os.path.join(dir_path, file)
             self.s3_resource.Bucket(self.bucket_name).download_file(file, full_file_path)
             files_downloaded += 1
             progress_bar.write(full_file_path)
@@ -61,13 +62,23 @@ class S3FileDownloader:
 
         return files_downloaded
 
-    def verify_hashes(self) -> int:
-        print(f'Verifying {len(self.hash_files)} hash files ...')
-        for hash_filename in self.hash_files:
-            verified = hash_utils.verify_integrity_hash_file(hash_filename)
-            if verified:
-                print(f'Integrity hash file {hash_filename} is OK')
+
+    def download_all_files(self) -> int:
+        return self._download_all_files(self.bucket_name)
+
+
+    def verify_hashes(self) -> bool:
+        verified_count = 0
+        failed_count = 0
+
+        for hash_filename in tqdm(self.hash_files, desc='Verifying integrity hashes'):
+            if hash_utils.verify_integrity_hash_file(hash_filename):
                 os.remove(hash_filename)
+                verified_count += 1
+            else:
+                failed_count += 1
+
+        return verified_count == len(self.hash_files)
 
 
 def main(s3_bucket_name: str) -> None:
@@ -85,7 +96,11 @@ def main(s3_bucket_name: str) -> None:
     elapsed_time = round(end - start, 3)
     print(f'Downloaded {count} files in time: {elapsed_time} seconds')
 
-    file_downloader.verify_hashes()
+    verified = file_downloader.verify_hashes()
+    if verified:
+        print(f'All integrity hashes verified')
+    else:
+        print(f'WARNING: not all integrity hashes were verified')
 
 
 if __name__ == "__main__":
