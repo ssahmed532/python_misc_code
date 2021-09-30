@@ -1,9 +1,16 @@
 import argparse
 import boto3
 import sys
-import uuid
+import s3_utils
+
 from pprint import pprint
 from botocore.exceptions import NoCredentialsError
+
+# TODO:
+#   - when in verbose mode, display the CreationDate in the local TZ
+#   - add an optional CLI argument to display bucket content counts in
+#     the listing
+#
 
 
 def list_all_s3_buckets(verbose: bool) -> None:
@@ -28,10 +35,12 @@ def list_all_s3_buckets(verbose: bool) -> None:
     # Output the bucket names
     print('Existing S3 buckets:')
     for index, bucket in enumerate(response['Buckets'], start=1):
+        bucket_name = bucket['Name']
+        bucket_region = s3_utils.get_bucket_location(s3, bucket_name)
         if verbose:
-            print(f'    {index}. {bucket["Name"]} created on {bucket["CreationDate"]}')
+            print(f'    {index}. {bucket_name} in region {bucket_region} created on {bucket["CreationDate"]}')
         else:
-            print(f'    {index}. {bucket["Name"]}')
+            print(f'    {index}. {bucket_name} in region {bucket_region}')
     print()
 
 
