@@ -3,6 +3,18 @@ import sys
 import s3_utils
 
 
+# TODO:
+#   - for buckets that reside in a location other than the current
+#     default / session region, automatically figure out where that
+#     Bucket resides and then specify the LocationConstraint so that
+#     we don't get the following sorts of Exceptions:
+#
+#       botocore.exceptions.ClientError: An error occurred (IllegalLocationConstraintException)
+#       when calling the ListObjects operation: The unspecified location constraint is
+#       incompatible for the region specific endpoint this request was sent to.
+#
+
+
 def main(bucket_name: str) -> None:
     s3 = boto3.resource('s3')
 
