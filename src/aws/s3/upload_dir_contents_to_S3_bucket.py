@@ -5,6 +5,7 @@ import sys
 from datetime import timedelta
 from timeit import default_timer as timer
 from tqdm import tqdm
+from commons import NonExistentS3BucketError
 
 import hash_utils
 import s3_utils
@@ -28,17 +29,8 @@ import s3_utils
 #
 
 
-class NonExistentS3BucketError(Exception):
-    """Raised when a specific, named S3 Bucket does not exist"""
-    def __init__(self, bucket_name: str):
-        self.bucket_name = bucket_name
-        self.message = 'S3 Bucket does not exist'
-        super().__init__(self.message)
-
-
 class S3FileUploader:
-    """A utility class to upload files to an existing S3 Bucket
-    """
+    """A utility class to upload files to an existing S3 Bucket"""
 
     def __init__(self, bucket_name: str) -> None:
         self.bucket_name = bucket_name
@@ -50,8 +42,8 @@ class S3FileUploader:
 
         if not s3_utils.check_bucket(resource, self.bucket_name):
             raise NonExistentS3BucketError(self.bucket_name)
-        else:
-            self.s3_resource = resource
+
+        self.s3_resource = resource
 
 
     def _upload_file_to_s3_bucket(self, file_path: str, calc_hash: bool) -> bool:
@@ -123,7 +115,7 @@ def main(dir_path: str, s3_bucket_name: str, is_file: bool) -> None:
         file_uploader.initialize()
     except NonExistentS3BucketError as e:
         print(f'ERROR: cannot upload file(s) to non-existent S3 bucket ({s3_bucket_name})', file=sys.stderr)
-        sys.exit(1)
+        sys.exit(2)
 
     start = timer()
     if is_file:

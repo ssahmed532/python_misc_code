@@ -8,6 +8,7 @@ import s3_utils
 from datetime import timedelta
 from timeit import default_timer as timer
 from tqdm import tqdm
+from commons import NonExistentS3BucketError
 
 
 # TODO
@@ -34,18 +35,13 @@ class S3FileDownloader:
         self.s3_resource = None
         self.hash_files = []
 
-    def initialize(self) -> bool:
+    def initialize(self) -> None:
         resource = boto3.resource('s3')
 
-        bucket_exists = s3_utils.check_bucket(resource, self.bucket_name)
+        if not s3_utils.check_bucket(resource, self.bucket_name):
+            raise NonExistentS3BucketError(self.bucket_name)
 
-        if not bucket_exists:
-            # TODO: raise an appropriate Exception here
-            print(f'ERROR: cannot download files from a non-existent S3 bucket ({self.bucket_name})')
-        else:
-            self.s3_resource = resource
-
-        return bucket_exists
+        self.s3_resource = resource
 
     def download_all_files(self) -> int:
         files_downloaded = 0
@@ -76,10 +72,10 @@ class S3FileDownloader:
 
 def main(s3_bucket_name: str) -> None:
     file_downloader = S3FileDownloader(s3_bucket_name)
-    init_status = file_downloader.initialize()
-
-    if not init_status:
-        print(f'ERROR: failed to initialize for downloading bucket contents')
+    try:
+        file_downloader.initialize()
+    except NonExistentS3BucketError as e:
+        print(f'ERROR: cannot download file(s) from non-existent S3 bucket ({s3_bucket_name})', file=sys.stderr)
         sys.exit(2)
 
     start = timer()
