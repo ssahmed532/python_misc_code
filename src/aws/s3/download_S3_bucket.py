@@ -23,6 +23,7 @@ from commons import NonExistentS3BucketError
 #     implementation detail and nothing about them is visible except for when
 #     file integrity verification fails
 #   - add a verbose mode
+#   - add a warning when trying to download an empty bucket
 #
 
 
