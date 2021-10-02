@@ -4,6 +4,20 @@ import pprint
 import sys
 
 
+# TODO:
+#   - integrate the argparse module
+#   - allow for buckets to be created in regions other than the current
+#     default region set in aws CLI configuration
+#   - bucket creation methods should be moved into the s3_utils module
+#   - add a new method to allow creating a bucket by adding the default
+#     (or user-specified) prefix to an existing directory name. This will
+#     be helpful when uploading a whole directory to a new bucket that will
+#     be automatically created prior to uploading the directory.
+#
+
+
+# TODO:
+#   - move this to s3_utils module
 DEFAULT_BUCKET_PREFIX = 'ssahmed'
 
 
@@ -14,6 +28,7 @@ def get_new_bucket_name(bucket_prefix):
 def create_bucket(bucket_name: str, s3_resource):
     session = boto3.session.Session()
     current_region = session.region_name
+    #current_region = 'me-south-1'
 
     if not bucket_name:
         # if the bucket name is not specified then auto-generate one
