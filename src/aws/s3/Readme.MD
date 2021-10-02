@@ -17,8 +17,8 @@ AWS resouces using Python:
   associated security credentials will be available on the AWS console
   for use in the application.
 
-- Copy and save the *Access Key ID* and *Secret Access Key* for use in the
-  Python application. Ensure to copy and save the *Secret Access Key* in
+- Copy and save the **Access Key ID** and **Secret Access Key** for use in the
+  Python application. Ensure to copy and save the **Secret Access Key** in
   a 'safe location' as the Secret access key cannot be retrieved again
   after the previous step.
 
@@ -26,12 +26,12 @@ AWS resouces using Python:
 
 - From a new Windows command prompt, enter the following commands:
 	aws configure
-	- enter the *AWS Access Key ID* from the previous step above
-	- enter the *AWS Secret Access Key* from the previous step above
+	- enter the **AWS Access Key ID** from the previous step above
+	- enter the **AWS Secret Access Key** from the previous step above
 	- set the default region to use (e.g. us-east-1 or some such)
 
 - Once this is done, the Python scripts in this directory can be run
   from a Python-enabled command prompt or terminal:
     (e.g.)
-    ``python list_all_buckets.py``
-    ``python create_s3_bucket.py``
+    - ``python list_all_buckets.py``    
+    - ``python create_s3_bucket.py``    
