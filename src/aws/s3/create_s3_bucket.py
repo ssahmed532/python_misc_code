@@ -2,6 +2,7 @@ import boto3
 import uuid
 import pprint
 import sys
+import s3_utils
 
 from botocore.exceptions import ClientError
 import commons
@@ -9,6 +10,10 @@ import commons
 
 # TODO:
 #   - integrate the argparse module
+#   - add support for the following CLI arguments:
+#       - new S3 bucket name
+#       - auto-generate S3 bucket name using a specified prefix
+#       - new AWS region in which the bucket has to reside (other than us-east-1)
 #   - allow for buckets to be created in regions other than the current
 #     default region set in aws CLI configuration
 #   - bucket creation methods should be moved into the s3_utils module
@@ -18,15 +23,6 @@ import commons
 #     be automatically created prior to uploading the directory.
 #   - add detailed logging via the Python standard logging module
 #
-
-
-# TODO:
-#   - move this to s3_utils module
-DEFAULT_BUCKET_PREFIX = 'ssahmed'
-
-
-def get_new_bucket_name(bucket_prefix):
-    return '-'.join([bucket_prefix, str(uuid.uuid4())])
 
 
 def create_bucket(bucket_name: str, region=None) -> bool:
@@ -84,7 +80,7 @@ def main(s3_bucket_name: str) -> None:
 
     if not s3_bucket_name:
         # if the bucket name is not specified then auto-generate one
-        s3_bucket_name = get_new_bucket_name(DEFAULT_BUCKET_PREFIX)
+        s3_bucket_name = s3_utils.get_new_bucket_name()
         print(f'Auto-generated bucket name is: \"{s3_bucket_name}\"')
 
     #create_bucket_status = create_bucket(s3_bucket_name, commons.AwsRegions.MIDDLE_EAST1)

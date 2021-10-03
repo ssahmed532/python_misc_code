@@ -1,6 +1,17 @@
-import boto3
+import uuid
 import botocore
 from boto3.resources.base import ServiceResource
+
+
+
+DEFAULT_S3_BUCKET_PREFIX = 'ssahmed'
+
+
+def get_new_bucket_name(bucket_prefix: str = None):
+    if bucket_prefix:
+        return '-'.join([bucket_prefix, str(uuid.uuid4())])
+    else:
+        return '-'.join([DEFAULT_S3_BUCKET_PREFIX, str(uuid.uuid4())])
 
 
 # taken from:
