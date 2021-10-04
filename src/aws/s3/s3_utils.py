@@ -1,4 +1,5 @@
 import uuid
+import boto3
 import botocore
 from boto3.resources.base import ServiceResource
 
@@ -67,3 +68,15 @@ def get_bucket_location(s3_client: "botocore.client.S3", bucket_name: str) -> st
     #
 
     return 'us-east-1' if not location else location
+
+
+
+def get_current_region() -> str:
+    """Get the current region name as specified in the Environment
+       variables or configuration.
+
+    Returns:
+        str: the current region name
+    """
+    session = boto3.Session()
+    return session.region_name
