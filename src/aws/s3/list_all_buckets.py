@@ -12,6 +12,7 @@ from botocore.exceptions import NoCredentialsError
 #   - when in verbose mode, display the CreationDate in the local TZ
 #   - add an optional CLI argument to display bucket content counts in
 #     the listing
+#   - display the output in a proper, tabular manner with a header
 #
 
 
@@ -38,6 +39,9 @@ def list_all_s3_buckets(verbose: bool) -> None:
         print('list_buckets response data:')
         pprint(response)
         print()
+
+    # TODO:
+    #   make a separate call to build up a dict of bucket name -> region/location
 
     # Output the bucket names
     print(f"Retrieved {len(response['Buckets'])} buckets for current AWS user/account:")
