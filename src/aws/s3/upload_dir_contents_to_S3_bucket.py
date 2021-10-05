@@ -20,6 +20,9 @@ import s3_utils
 #     file that lists all of the files and their respective hashes
 #   - prompt when a file with the same key already exists in the target bucket
 #   - add a verbose mode
+#   - add an optional flag that adds an extra check/verification step to verify
+#     that a file was successfully uploaded to the bucket. Should be optional as
+#     this will slow down the end-to-end upload time.
 #   - add an option to recurse into all sub-directories when uploading files. If not specified,
 #     only upload those files in the root of the specified directory.
 #   - add an option to skip (cryptographic) hash generation
