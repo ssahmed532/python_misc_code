@@ -19,8 +19,11 @@ def main(bucket_name: str) -> None:
     s3 = boto3.resource('s3')
 
     bucket_contents = s3_utils.get_bucket_contents(s3, bucket_name)
-    for item in bucket_contents:
-        print(item)
+    if bucket_contents:
+        for index, item in enumerate(bucket_contents, start=1):
+            print(f'{index}. {item}')
+    else:
+        print(f'Bucket {bucket_name} is empty!')
 
 
 if __name__ == "__main__":
