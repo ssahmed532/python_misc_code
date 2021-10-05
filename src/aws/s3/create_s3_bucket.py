@@ -108,14 +108,21 @@ def main(args: argparse.Namespace) -> None:
     print(f'Name of new S3 bucket to create is: {args.s3_bucket_name}')
 
     bucket_region = None
+    if args.location:
+        print(f'Location/region for new S3 bucket is: {args.location}')
+        # TODO:
+        #   validate that the region requested is valid is in the list
+        #   of Regions that this script supports
+        bucket_region = args.location
+
     current_region = s3_utils.get_current_region()
-    if current_region != commons.AwsRegions.US_EAST1:
+    if current_region == commons.AwsRegions.US_EAST1:
         # there is a peculiar bug in boto3 such that when the current
         # region is us-east-1 (N. Virginia), the region should not be
         # specified in the create_bucket() API call using the
         # LocationConstraint attribute.
         # But for all other regions, it *HAS* to be specified!
-        bucket_region = current_region
+        bucket_region = None
 
     status = create_bucket(args.s3_bucket_name, bucket_region)
     if status:
