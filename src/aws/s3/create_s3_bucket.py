@@ -21,6 +21,7 @@ import commons
 #     (or user-specified) prefix to an existing directory name. This will
 #     be helpful when uploading a whole directory to a new bucket that will
 #     be automatically created prior to uploading the directory.
+#   - display total elapsed time to create the new S3 bucket
 #   - add detailed logging via the Python standard logging module
 #   - add verbose mode
 #
@@ -44,7 +45,8 @@ def create_bucket(bucket_name: str, region: str = None) -> bool:
 
     global args
 
-    print(f'DEBUG: create_bucket(): new bucket name={bucket_name}, region={region}')
+    if args.verbose:
+        print(f'DEBUG: create_bucket(): new bucket name={bucket_name}, region={region}')
 
     s3_client = boto3.client('s3', region_name=region)
 
