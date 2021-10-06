@@ -3,7 +3,7 @@ import boto3
 # TODO:
 #   - move this into a class-static initializer
 #
-ssm = boto3.client('ssm')
+ssm = boto3.client('ssm', region_name='us-east-1')
 
 
 # Before this script can be executed, the current authenticated AWS user
