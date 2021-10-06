@@ -24,6 +24,8 @@ from commons import NonExistentS3BucketError
 #     file integrity verification fails
 #   - add a verbose mode
 #   - add a warning when trying to download an empty bucket
+#   - Intelligently calculate an average transfer rate
+#     (bytes downloaded / total transfer time) and display it at the end.
 #
 
 

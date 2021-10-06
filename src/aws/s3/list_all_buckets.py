@@ -28,8 +28,8 @@ def list_all_s3_buckets(verbose: bool) -> None:
 
     # Retrieve the list of existing buckets
     start = timer()
-    s3 = boto3.client('s3')
-    response = s3.list_buckets()
+    s3_client = boto3.client('s3')
+    response = s3_client.list_buckets()
     end = timer()
     elapsed_time = round(end - start, 3)
     print(f'list_buckets completed in: {elapsed_time} seconds')
@@ -47,7 +47,7 @@ def list_all_s3_buckets(verbose: bool) -> None:
     print(f"Retrieved {len(response['Buckets'])} buckets for current AWS user/account:")
     for index, bucket in enumerate(response['Buckets'], start=1):
         bucket_name = bucket['Name']
-        bucket_region = s3_utils.get_bucket_location(s3, bucket_name)
+        bucket_region = s3_utils.get_bucket_location(bucket_name)
         if verbose:
             print(f'    {index}. {bucket_name} in region {bucket_region} created on {bucket["CreationDate"]}')
         else:

@@ -45,17 +45,17 @@ def get_bucket_contents(s3_resource: ServiceResource, bucket_name: str) -> list[
     return bucket_contents
 
 
-def get_bucket_location(s3_client: "botocore.client.S3", bucket_name: str) -> str:
+def get_bucket_location(bucket_name: str) -> str:
     """Get the location (region) the bucket resides in
 
     Args:
-        s3_client (botocore.client.S3): a valid, initialized low-level S3 client object
         bucket_name (str): name of the S3 bucket
 
     Returns:
         str: the location (region) the bucket resides in
     """
 
+    s3_client = boto3.client('s3')
     location = s3_client.get_bucket_location(Bucket=bucket_name)['LocationConstraint']
 
     # A peculiarity of the Boto3 library (or of the underlying AWS API)
@@ -68,7 +68,6 @@ def get_bucket_location(s3_client: "botocore.client.S3", bucket_name: str) -> st
     #
 
     return 'us-east-1' if not location else location
-
 
 
 def get_current_region() -> str:
