@@ -7,6 +7,15 @@ import s3_utils
 
 from botocore.exceptions import ClientError
 
+# TODO
+#   - integrate the argparse module
+#   - add an interactive prompt that checks whether the user really
+#     wants to delete the specified bucket
+#   - handle non-empty buckets by prompting the user once more and then
+#     iteratively delete all of the objects in the bucket before
+#     deleting the bucket itself.
+#
+
 
 def delete_bucket(bucket_name):
     bucket_location = s3_utils.get_bucket_location(bucket_name)
