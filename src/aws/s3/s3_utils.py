@@ -25,16 +25,21 @@ def check_bucket(s3_resource: ServiceResource, bucket_name: str) -> bool:
         return False
 
 
-def get_bucket_contents(s3_resource: ServiceResource, bucket_name: str) -> list[str]:
+def get_bucket_contents(bucket_name: str, location: str) -> list[str]:
     """Get a list of the contents in the specified S3 bucket
 
     Args:
-        s3_resource (ServiceResource): a valid, initialized S3 service resource object
         bucket_name (str): name of the S3 bucket
+        location (str): the location (region) the S3 bucket resides in
 
     Returns:
         list[str]: a list of files in the specified S3 bucket
     """
+
+    # TODO:
+    #   - look into using list_objects_v2()
+
+    s3_resource = boto3.resource('s3', region_name=location)
 
     bucket_contents = []
 
@@ -72,10 +77,37 @@ def get_bucket_location(bucket_name: str) -> str:
 
 def get_current_region() -> str:
     """Get the current region name as specified in the Environment
-       variables or configuration.
+       variables or AWS configuration.
 
     Returns:
         str: the current region name
     """
+
     session = boto3.Session()
     return session.region_name
+
+
+def is_bucket_empty(bucket_name: str, location: str) -> bool:
+    """Check if the specified S3 bucket is empty
+
+    Args:
+        bucket_name (str): name of the S3 bucket
+        location (str): the location (region) the bucket resides in
+
+    Returns:
+        bool: True if the S3 bucket is empty, False otherwise
+    """
+
+    # TODO:
+    #   consider the following various approaches to determine the
+    #   optimal and most efficient way to determins if the bucket is
+    #   empty:
+    #
+    #   1) https://fuzzyblog.io/blog/aws/2019/10/24/three-ways-to-count-the-objects-in-an-aws-s3-bucket.html
+    #   2) https://stackoverflow.com/questions/54656455/get-count-of-objects-in-a-specific-s3-folder-using-boto3
+    #   3) https://blog.jverkamp.com/2018/07/15/counting-and-sizing-s3-buckets/
+    #   4) https://towardsdatascience.com/working-with-amazon-s3-buckets-with-boto3-785252ea22e0
+
+    contents = get_bucket_contents(bucket_name, location)
+
+    return len(contents) == 0

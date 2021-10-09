@@ -16,9 +16,9 @@ import s3_utils
 
 
 def main(bucket_name: str) -> None:
-    s3 = boto3.resource('s3')
+    bucket_location = s3_utils.get_bucket_location(bucket_name)
 
-    bucket_contents = s3_utils.get_bucket_contents(s3, bucket_name)
+    bucket_contents = s3_utils.get_bucket_contents(bucket_name, bucket_location)
     if bucket_contents:
         for index, item in enumerate(bucket_contents, start=1):
             print(f'{index}. {item}')

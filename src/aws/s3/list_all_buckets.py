@@ -21,11 +21,6 @@ def list_all_s3_buckets(verbose: bool) -> None:
        and Region, and print to stdout.
     """
 
-    if verbose:
-        print(f'boto3 library version is {boto3.__version__}')
-        print(f'Current region is {boto3.Session().region_name}')
-        print()
-
     # Retrieve the list of existing buckets
     start = timer()
     s3_client = boto3.client('s3')
@@ -52,6 +47,7 @@ def list_all_s3_buckets(verbose: bool) -> None:
             print(f'    {index}. {bucket_name} in region {bucket_region} created on {bucket["CreationDate"]}')
         else:
             print(f'    {index}. {bucket_name} in region {bucket_region}')
+
     print()
 
 
@@ -66,6 +62,12 @@ if __name__ == "__main__":
         help="display verbose output")
 
     args = arg_parser.parse_args()
+
+    if args.verbose:
+        print(f'python version: {sys.version}')
+        print(f'boto3 library version: {boto3.__version__}')
+        print(f'Current region: {boto3.Session().region_name}')
+        print()
 
     try:
         list_all_s3_buckets(args.verbose)
