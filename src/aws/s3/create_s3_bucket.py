@@ -15,6 +15,7 @@ import commons
 #       - [DONE] new AWS region in which the bucket has to reside (other than us-east-1)
 #   - allow for buckets to be created in regions other than the current
 #     default region set in aws CLI configuration
+#   - further tighten up security of the newly created S3 Bucket
 #   - Block Public Access settings for the new S3 Bucket
 #   - bucket creation methods should be moved into the s3_utils module
 #   - add a new method to allow creating a bucket by adding the default
