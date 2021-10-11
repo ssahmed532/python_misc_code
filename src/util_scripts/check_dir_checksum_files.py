@@ -10,8 +10,12 @@ SHA1_EXT = ".sha1"
 
 
 # TODO:
-#   also highlight those folders where the existing SHA1 checksum file
-#   is "out of date" with respect to the contents of that folder.
+#   - also highlight those folders where the existing SHA1 checksum file
+#     is "out of date" with respect to the contents of that folder.
+#   - integrate the argparse module for a proper CLI.
+#   - look into using the cfv Python package instead of shelling out
+#     and calling the cfv program installed on Windows.
+#
 
 
 def calculate_checksums(dir_path):
