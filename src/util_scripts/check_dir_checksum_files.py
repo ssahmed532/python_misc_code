@@ -2,6 +2,7 @@
 # and highlight those ones that do not have a checksum file present in them.
 #
 
+import argparse
 import os
 import sys
 import subprocess
@@ -10,15 +11,15 @@ SHA1_EXT = ".sha1"
 
 
 # TODO:
+#   - add verbose output when the --verbose flag is enabled
 #   - also highlight those folders where the existing SHA1 checksum file
 #     is "out of date" with respect to the contents of that folder.
-#   - integrate the argparse module for a proper CLI.
 #   - look into using the cfv Python package instead of shelling out
 #     and calling the cfv program installed on Windows.
 #
 
 
-def calculate_checksums(dir_path):
+def do_calculate_checksums(dir_path) -> bool:
     program = "C:\\Windows\\cfv.bat"
     result = subprocess.run([program, "-C", "-rr", "-t", "sha1"], cwd=dir_path)
     #print("returncode: " + str(result.returncode))
@@ -26,32 +27,46 @@ def calculate_checksums(dir_path):
     return (result.returncode == 0)
 
 
-def print_usage():
-        print('Usage: python check_dir_checksum_files.py <dirPath> [--calculate-checksums]', file=sys.stderr)
-
-
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        print_usage()
-        sys.exit(1)
+    arg_parser = argparse.ArgumentParser(
+        allow_abbrev=False,
+        description='Script to check (and calculate) CFV style checksums in a root directory')
 
-    verbose = False
-    compute_checksums = False
+    arg_parser.add_argument(
+        "-v",
+        "--verbose",
+        required=False,
+        action="store_true",
+        help="display verbose output"
+        )
 
-    if (len(sys.argv) == 3) and sys.argv[2].lower() == "--calculate-checksums":
-        compute_checksums = True
-        print("DEBUG: compute_checksums is True")
+    arg_parser.add_argument(
+        'dir_path',
+        type=str,
+        help='path to the root directory to check'
+        )
 
-    dir_path = os.path.abspath(sys.argv[1])
+    arg_parser.add_argument(
+        '--calc-checksums',
+        action='store_true',
+        required=False,
+        help='calculate missing checksums in sub-directories'
+        )
 
-    print(f'Checking all sub-directories in root dir path: {dir_path} ...')
+    args = arg_parser.parse_args()
+
+    verbose = args.verbose
+    root_dir = args.dir_path
+    calculate_checksums = args.calc_checksums
+
+    print(f'Checking all sub-directories in root dir path: {root_dir} ...')
 
     dirs_without_checksums = []
     count_dirs_with_checksums = 0
     count_dirs_without_checksums = 0
     count_dirs = 0
 
-    with os.scandir(dir_path) as it:
+    with os.scandir(root_dir) as it:
         for entry in it:
             if entry.is_dir():
                 count_dirs += 1
@@ -82,11 +97,11 @@ if __name__ == '__main__':
         print("All checksums appear to be up-to-date")
         sys.exit(0)
 
-    if compute_checksums and (len(dirs_without_checksums) > 0):
+    if calculate_checksums and (len(dirs_without_checksums) > 0):
         count_computed_checksums = 0
         print(f'Computing checksums in {len(dirs_without_checksums)} directories ...')
         for dir_path in dirs_without_checksums:
-            calculate_checksums(dir_path)
+            do_calculate_checksums(dir_path)
             count_computed_checksums += 1
-        
+
         print(f'Computed dir checksums for {count_computed_checksums} directories')
