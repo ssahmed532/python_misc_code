@@ -66,14 +66,14 @@ class Game:
             self.strategy = strategy
         else:
             self.strategy = Random()
-            
-        print(f'Game strategy is: {strategy}')
+
+        print(f"Game strategy is: {strategy}")
 
     def play(self, sec: RPSStrategy) -> None:
         s1 = self.strategy.selection()
-        print(f'My selection is: {s1}')
+        print(f"My selection is: {s1}")
         s2 = sec.strategy.selection()
-        print(f'Other player has selected: {s2}')
+        print(f"Other player has selected: {s2}")
 
         if s1 == s2:
             print("It's a tie")
@@ -93,8 +93,9 @@ class Game:
             else:
                 print("Player 2 wins!")
 
+
 if __name__ == "__main__":
     player1 = Game(Random())
     player2 = Game(Rock())
-    
+
     player1.play(player2)
