@@ -7,11 +7,14 @@
 #   https://www.infoworld.com/article/3632284/python-concurrency-and-parallelism-explained.html
 #
 
+from typing import final
 import aiohttp
 import asyncio
 import argparse
 import re
 import urllib.request as ur
+
+import hash_utils
 
 
 from concurrent.futures import ThreadPoolExecutor
@@ -48,11 +51,19 @@ URLS = [
     "https://www.oris.ch/",
     "https://www.spinnaker-watches.com/",
     "https://danhenrywatches.com/",
+    "https://halioswatches.com/",
+    "https://www.hamiltonwatch.com/",
+    "https://www.rado.com/",
+    "https://www.fossil.com/en-us/",
 ]
 
 META_MATCH = re.compile("<meta .*?>")
 
 datas = []
+
+final_results = {}
+
+args = None
 
 
 async def get_from_coroutine(session, url):
@@ -61,10 +72,36 @@ async def get_from_coroutine(session, url):
         return await r.text()
 
 
-def get_from(url):
+def get_data_from_url(url):
+    """Get data from the specified Web URL. This function is meant to
+       simulate an IO and CPU intensive workload.
+
+    Args:
+        url (str): a URL to a website
+    """
+
     connection = ur.urlopen(url)
-    data = connection.read()
-    datas.append(data)
+
+    data = str(connection.read())
+
+    matches = META_MATCH.findall(data)
+    if matches:
+        data = data + str(matches)
+
+    hash_value0 = hash_utils.calc_str_hash_SHA224(data)
+    hash_value1 = hash_utils.calc_str_hash_SHA256(data + hash_value0)
+    hash_value2 = hash_utils.calc_str_hash_SHA384(data + hash_value1 + hash_value0)
+    hash_value3 = hash_utils.calc_str_hash_SHA512(
+        data + hash_value2 + hash_value1 + hash_value0
+    )
+    hash_value4 = hash_utils.calc_str_hash_Blake2b(
+        data + hash_value3 + hash_value2 + hash_value1 + hash_value0
+    )
+    hash_value5 = hash_utils.calc_str_hash_SHA3_512(
+        data + hash_value4 + hash_value3 + hash_value2 + hash_value1 + hash_value0
+    )
+
+    final_results[url] = hash_value5
 
 
 def get_from_extra(url):
@@ -74,23 +111,27 @@ def get_from_extra(url):
 
 
 def run_task_single_threaded():
-    print(f"Fetching data from URLs (single-threaded)")
     for url in URLS:
-        # print(f"Processing site: {url}")
-        get_from(url)
+        get_data_from_url(url)
 
 
 def run_task_multi_threaded():
-    print(f"Fetching data from URLs (multi-threaded)")
     with ThreadPoolExecutor() as ex:
         for url in URLS:
-            ex.submit(get_from, url)
+            ex.submit(get_data_from_url, url)
 
 
 async def async_task_launcher():
     print(f"Fetching data from URLs (async/coroutine)")
     async with aiohttp.ClientSession() as session:
         datas = await asyncio.gather(*[get_from_coroutine(session, u) for u in URLS])
+
+
+def print_final_results() -> None:
+    for key in final_results.keys():
+        print(f"{key} -->> {final_results[key]}")
+
+    print()
 
 
 if __name__ == "__main__":
@@ -139,21 +180,29 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
 
     if args.single_threaded:
+        print(f"Running tasks (single-threaded)")
+
         start = timer()
         run_task_single_threaded()
         end = timer()
+
+        if args.verbose:
+            print_final_results()
+
         print(f"Single-threaded run: total elapsed time: {end - start}")
         print()
-        # print([_[:200] for _ in datas])
-        # print()
     elif args.multi_threaded:
+        print(f"Running tasks (multi-threaded)")
+
         start = timer()
         run_task_multi_threaded()
         end = timer()
+
+        if args.verbose:
+            print_final_results()
+
         print(f"Multi-threaded run: total elapsed time: {end - start}")
         print()
-        # print([_[:200] for _ in datas])
-        # print()
     elif args.async_coroutine:
         start = timer()
         loop = asyncio.get_event_loop()
