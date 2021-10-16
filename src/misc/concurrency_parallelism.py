@@ -55,6 +55,11 @@ URLS = [
     "https://www.hamiltonwatch.com/",
     "https://www.rado.com/",
     "https://www.fossil.com/en-us/",
+    #"https://10pearls.com/",
+    #"https://www.citizenwatch.com/us/en/",
+    #"https://www.gshock.com/",
+    "https://www.mkiiwatches.com/",
+    "https://luminox.com/",
 ]
 
 META_MATCH = re.compile("<meta .*?>")
