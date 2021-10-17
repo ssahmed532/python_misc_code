@@ -55,11 +55,16 @@ URLS = [
     "https://www.hamiltonwatch.com/",
     "https://www.rado.com/",
     "https://www.fossil.com/en-us/",
-    #"https://10pearls.com/",
-    #"https://www.citizenwatch.com/us/en/",
-    #"https://www.gshock.com/",
+    # "https://10pearls.com/",
+    # "https://www.citizenwatch.com/us/en/",
+    # "https://www.gshock.com/",
     "https://www.mkiiwatches.com/",
     "https://luminox.com/",
+    "https://www.unimaticwatches.com/",
+    "https://ming.watch/",
+    "https://ch.doxawatches.com/",
+    "https://zeloswatches.com/",
+    "https://www.straum.co/watches",
 ]
 
 META_MATCH = re.compile("<meta .*?>")
@@ -107,12 +112,6 @@ def get_data_from_url(url):
     )
 
     final_results[url] = hash_value5
-
-
-def get_from_extra(url):
-    connection = ur.urlopen(url)
-    data = str(connection.read())
-    return META_MATCH.findall(data)
 
 
 def run_task_single_threaded():
@@ -216,17 +215,15 @@ if __name__ == "__main__":
         print(f"Async/Coroutine run: total elapsed time: {end - start}")
         print()
     elif args.multi_processing:
+        print(f"Running tasks (multi-processing)")
+
         start = timer()
         with Pool() as p:
-            result = p.map(get_from_extra, URLS)
-        print(result)
+            result = p.map(get_data_from_url, URLS)
         end = timer()
+
+        if args.verbose:
+            print_final_results()
+
         print(f"Multi-processing run: total elapsed time: {end - start}")
         print()
-
-    # let's just look at the beginning of each data stream
-    # as this could be a lot of data
-    # print([_[:200] for _ in datas])
-    # print()
-
-    # print(f"Total elapsed time: {end - start}")
