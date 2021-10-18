@@ -1,0 +1,38 @@
+VSCode setup on Windows:
+    - install using 64-bit system installer
+    - disable auto-updates
+
+
+Plugins installed & enabled:
+Atom One Dark Theme
+akamud.vscode-theme-onedark
+
+Bracket Pair Colorizer
+CoenraadS.bracket-pair-colorizer
+
+Community Material Theme
+Equinusocio.vsc-community-material-theme
+
+Material Theme
+Equinusocio.vsc-material-theme
+
+Material Theme Icons
+equinusocio.vsc-material-theme-icons
+
+Todo Tree
+Gruntfuggly.todo-tree
+
+Python Indent by Kevin Rose
+KevinRose.vsc-python-indent
+
+Python Docstring Generator by Nils Werner
+njpwerner.autodocstring
+
+Python Type Hint
+njqdev.vscode-python-typehint
+
+Material Icon Theme
+PKief.material-icon-theme
+
+Trailing Spaces by Shardul Mahadik
+shardulm94.trailing-spaces
