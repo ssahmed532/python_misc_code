@@ -13,8 +13,13 @@ import commons
 #       - auto-generate S3 bucket name using internal, default prefix
 #       - [DONE] new S3 bucket name
 #       - [DONE] new AWS region in which the bucket has to reside (other than us-east-1)
+#   - when the user has not specified a region that the bucket should
+#     be created in, print the region in which the bucket was created
+#     when successfully completed.
 #   - allow for buckets to be created in regions other than the current
 #     default region set in aws CLI configuration
+#   - add a new CLI option (--show-locations or --show-regions) that
+#     lists all supported AWS regions where a new S3 Bucket can be created in
 #   - further tighten up security of the newly created S3 Bucket
 #   - Block Public Access settings for the new S3 Bucket
 #   - bucket creation methods should be moved into the s3_utils module

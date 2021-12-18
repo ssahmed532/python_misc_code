@@ -14,6 +14,8 @@ import s3_utils
 #   - integrate the argparse module
 #   - integrate the Python std logging module, and log all output to
 #     an ondisk logfile
+#   - when uploading a single file > 50 Mb, display a progress bar
+#     showing file upload progress based on the size of the file.
 #   - add an option for auto-creating an S3 bucket based on a
 #     user-specified bucket prefix
 #   - when uploading the contents of an entire directory, generate a
@@ -38,7 +40,9 @@ import s3_utils
 
 
 class S3FileUploader:
-    """A utility class to upload files to an existing S3 Bucket"""
+    """A utility class to upload files to an existing S3 Bucket. An instance
+       of this class is bound to a specified, named S3 bucket at the
+       time of instantiation."""
 
     def __init__(self, bucket_name: str) -> None:
         self.bucket_name = bucket_name
@@ -114,7 +118,9 @@ class S3FileUploader:
         Args:
             file_path (str): full path to the file
         """
+        print(f"Uploading file {file_path} to S3 Bucket {self.bucket_name} ... ")
         self._upload_file_to_s3_bucket(file_path, True)
+        print(f"Done.")
 
 
 def main(dir_path: str, s3_bucket_name: str, is_file: bool) -> None:
