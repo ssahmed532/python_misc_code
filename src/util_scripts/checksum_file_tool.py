@@ -7,6 +7,11 @@
 #   2) This script will not work on any other OS/platform.
 #   3) This script depends on the external CFV windows utility package (d/l from https://cfv.sourceforge.net/)
 #
+# Various references for click library usage:
+#   - https://www.assemblyai.com/blog/the-definitive-guide-to-python-click/
+#   - https://realpython.com/python-click/
+#   - https://www.codium.ai/blog/building-user-friendly-python-command-line-interfaces-with-click-and-command-line/
+#
 
 import os
 import pprint
