@@ -15,6 +15,7 @@
 
 import os
 import pprint
+import subprocess
 import sys
 from pathlib import Path
 
@@ -22,6 +23,22 @@ import click
 
 DIR_PATH_ARG = "dir_path"
 SHA1_EXT = ".sha1"
+
+
+def do_calculate_checksums(dir_path) -> bool:
+    program = "C:\\Windows\\cfv.bat"
+    result = subprocess.run([program, "-C", "-rr", "-t", "sha1"], cwd=dir_path)
+    # print("returncode: " + str(result.returncode))
+    # print(result)
+    return result.returncode == 0
+
+
+def do_verify_checksums(dir_path, checksum_file) -> bool:
+    program = "C:\\Windows\\cfv.bat"
+    result = subprocess.run([program, "-f", checksum_file], cwd=dir_path)
+    # print("returncode: " + str(result.returncode))
+    # print(result)
+    return result.returncode == 0
 
 
 @click.group()
@@ -48,6 +65,16 @@ def checkContext(ctx):
 @cli.command("check-4-missing-cfv-files")
 @click.pass_context
 def checkForMissingCfvFiles(ctx):
+    """Check for missing checksum files (cfv format) in the
+       specified directory.
+
+    Args:
+        ctx (_type_): context object that contains context info & data
+    """
+
+    # retrieve the dir_path argument from the context object
+    # this is the directoryu path within which to start checking for
+    # missing CFV format files
     dirPath = ctx.obj[DIR_PATH_ARG]
 
     dirs_without_checksums = []
@@ -90,6 +117,70 @@ def checkForMissingCfvFiles(ctx):
                     fg="green",
                 )
             )
+
+
+@cli.command("generate-cfv-files")
+@click.pass_context
+def generateCfvFiles(ctx):
+    """Generate (cfv format) checksum files for each sub-directory
+       found within the specified directory.
+
+    Args:
+        ctx (_type_): context object that contains context info & data
+    """
+    dirPath = ctx.obj[DIR_PATH_ARG]
+
+    countCfvFilesGenerated = 0
+    countDirsScanned = 0
+
+    with os.scandir(dirPath) as entries:
+        for entry in entries:
+            if entry.is_dir():
+                countDirsScanned += 1
+                sha1_checksum_filepath = os.path.join(entry.path, entry.name) + SHA1_EXT
+                if not os.path.exists(sha1_checksum_filepath):
+                    print(f"Generating cfv checksum file for {entry.path} ...")
+                    do_calculate_checksums(entry.path)
+                    countCfvFilesGenerated += 1
+
+        if countCfvFilesGenerated > 0:
+            print(f"Generated cfv checksums for {countCfvFilesGenerated} directories")
+        else:
+            print(
+                f"No cfv files generated; all sub-directories appear to be up-to-date"
+            )
+        print(f"Total no. of sub-directories scanned: {countDirsScanned}")
+
+
+@cli.command("verify-cfv-files")
+@click.pass_context
+def verifyCfvFiles(ctx):
+    """Recursively scan the specified dir_path and verify the
+       (cfv format) checksum files found in its sub-directories.
+
+    Args:
+        ctx (_type_): context object that contains context info & data
+    """
+    dirPath = ctx.obj[DIR_PATH_ARG]
+
+    countDirsScanned = 0
+    countCfvFilesVerified = 0
+
+    with os.scandir(dirPath) as entries:
+        for entry in entries:
+            if entry.is_dir():
+                countDirsScanned += 1
+                sha1_checksum_filepath = os.path.join(entry.path, entry.name) + SHA1_EXT
+                print(f"Verifying CFV checksum file in {entry.path} ...")
+                if do_verify_checksums(entry.path, sha1_checksum_filepath):
+                    countCfvFilesVerified += 1
+
+    if countDirsScanned == 0:
+        print("ERROR: No sub-directories found", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"Tested and verified cfv checksums for {countCfvFilesVerified} directories")
+    print(f"Total no. of sub-directories scanned: {countDirsScanned}")
 
 
 if __name__ == "__main__":
