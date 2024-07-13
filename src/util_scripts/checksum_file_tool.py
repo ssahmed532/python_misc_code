@@ -88,12 +88,17 @@ def checkForMissingCfvFiles(ctx):
                 count_dirs += 1
                 sha1_checksum_filepath = os.path.join(entry.path, entry.name) + SHA1_EXT
                 if os.path.exists(sha1_checksum_filepath):
-                    click.echo(f"+++ Found checksum file for dir: {entry.name}")
+                    click.echo(
+                        click.style(
+                            f"\N{check mark} checksum file found for [{entry.name}]",
+                            fg="green",
+                            bold=True,)
+                    )
                     count_dirs_with_checksums += 1
                 else:
                     click.echo(
                         click.style(
-                            f"WARNING: checksum file doesn't exist for dir: {entry.name}",
+                            f"\N{cross mark} checksum file not found for [{entry.name}]",
                             fg="red",
                             bold=True,
                         )
@@ -101,19 +106,20 @@ def checkForMissingCfvFiles(ctx):
                     count_dirs_without_checksums += 1
                     dirs_without_checksums.append(entry.path)
 
+    click.echo()
     if count_dirs == 0:
         click.echo(f"No sub-directories found in [{dirPath}], there is nothing to do.")
     else:
-        print(f"# of directories with CFV files: {count_dirs_with_checksums}")
-        print(f"# of directories without CFV files: {count_dirs_without_checksums}")
-        print()
+        click.echo(f"# of directories with CFV files: {count_dirs_with_checksums}")
+        click.echo(f"# of directories without CFV files: {count_dirs_without_checksums}")
+        click.echo()
 
         if count_dirs_without_checksums == 0:
             assert count_dirs_with_checksums == count_dirs
             assert not dirs_without_checksums
             click.echo(
                 click.style(
-                    f"All checksums appear to be up-to-date: you are all set!",
+                    "All checksums appear to be up-to-date: you are all set!",
                     fg="green",
                 )
             )
@@ -147,7 +153,7 @@ def generateCfvFiles(ctx):
             print(f"Generated cfv checksums for {countCfvFilesGenerated} directories")
         else:
             print(
-                f"No cfv files generated; all sub-directories appear to be up-to-date"
+                "No cfv files generated; all sub-directories appear to be up-to-date"
             )
         print(f"Total no. of sub-directories scanned: {countDirsScanned}")
 
