@@ -23,6 +23,43 @@ import click
 
 DIR_PATH_ARG = "dir_path"
 SHA1_EXT = ".sha1"
+VERBOSE_FLAG = "verbose"
+
+
+def validate_dir_path(ctx, param, value):
+    """Custom validator for directory path with styled error messages.
+
+    Args:
+        ctx: Click context object
+        param: Click parameter object
+        value: Path value to validate
+
+    Returns:
+        Path: The validated directory path
+    """
+    if not value.exists():
+        click.echo(
+            click.style(
+                f"ERROR: Directory '{value}' does not exist.",
+                fg="red",
+                bold=True
+            ),
+            err=True
+        )
+        ctx.exit(1)
+
+    if not value.is_dir():
+        click.echo(
+            click.style(
+                f"ERROR: Path '{value}' is not a directory.",
+                fg="red",
+                bold=True
+            ),
+            err=True
+        )
+        ctx.exit(1)
+
+    return value
 
 
 def do_calculate_checksums(dir_path) -> bool:
@@ -44,15 +81,16 @@ def do_verify_checksums(dir_path, checksum_file) -> bool:
 @click.group()
 @click.pass_context
 @click.version_option("0.1.0", prog_name="checksum_file_tool")
+@click.option("-v", "--verbose", is_flag=True, help="Display verbose output")
 @click.argument(
     "dir_path",
-    type=click.Path(
-        exists=True, dir_okay=True, resolve_path=True, file_okay=False, path_type=Path
-    ),
+    type=click.Path(resolve_path=True, path_type=Path),
+    callback=validate_dir_path,
 )
-def cli(ctx, dir_path):
+def cli(ctx, dir_path, verbose):
     ctx.ensure_object(dict)
     ctx.obj[DIR_PATH_ARG] = dir_path
+    ctx.obj[VERBOSE_FLAG] = verbose
 
 
 @cli.command("check-context-object")
@@ -76,6 +114,7 @@ def checkForMissingCfvFiles(ctx):
     # this is the directoryu path within which to start checking for
     # missing CFV format files
     dirPath = ctx.obj[DIR_PATH_ARG]
+    verbose = ctx.obj[VERBOSE_FLAG]
 
     dirs_without_checksums = []
     count_dirs_with_checksums = 0
@@ -88,21 +127,23 @@ def checkForMissingCfvFiles(ctx):
                 count_dirs += 1
                 sha1_checksum_filepath = os.path.join(entry.path, entry.name) + SHA1_EXT
                 if os.path.exists(sha1_checksum_filepath):
-                    click.echo(
-                        click.style(
-                            f"\N{check mark} checksum file found for [{entry.name}]",
-                            fg="green",
-                            bold=True,)
-                    )
+                    if verbose:
+                        click.echo(
+                            click.style(
+                                f"\N{check mark} checksum file found for [{entry.name}]",
+                                fg="green",
+                                bold=True,)
+                        )
                     count_dirs_with_checksums += 1
                 else:
-                    click.echo(
-                        click.style(
-                            f"\N{cross mark} checksum file not found for [{entry.name}]",
-                            fg="red",
-                            bold=True,
+                    if verbose:
+                        click.echo(
+                            click.style(
+                                f"\N{cross mark} checksum file not found for [{entry.name}]",
+                                fg="red",
+                                bold=True,
+                            )
                         )
-                    )
                     count_dirs_without_checksums += 1
                     dirs_without_checksums.append(entry.path)
 
@@ -135,6 +176,7 @@ def generateCfvFiles(ctx):
         ctx (_type_): context object that contains context info & data
     """
     dirPath = ctx.obj[DIR_PATH_ARG]
+    verbose = ctx.obj[VERBOSE_FLAG]
 
     countCfvFilesGenerated = 0
     countDirsScanned = 0
@@ -145,17 +187,28 @@ def generateCfvFiles(ctx):
                 countDirsScanned += 1
                 sha1_checksum_filepath = os.path.join(entry.path, entry.name) + SHA1_EXT
                 if not os.path.exists(sha1_checksum_filepath):
-                    print(f"Generating cfv checksum file for {entry.path} ...")
+                    click.echo(f"Generating cfv checksum file for {entry.path} ...")
                     do_calculate_checksums(entry.path)
                     countCfvFilesGenerated += 1
 
         if countCfvFilesGenerated > 0:
-            print(f"Generated cfv checksums for {countCfvFilesGenerated} directories")
-        else:
-            print(
-                "No cfv files generated; all sub-directories appear to be up-to-date"
+            click.echo(
+                click.style(
+                    f"Generated cfv checksums for {countCfvFilesGenerated} directories",
+                    fg="green",
+                )
             )
-        print(f"Total no. of sub-directories scanned: {countDirsScanned}")
+        else:
+            click.echo(
+                click.style(
+                    "No cfv files generated; all sub-directories appear to be up-to-date",
+                    fg="green",
+                )
+            )
+
+    if verbose:
+        click.echo(f"Total sub-directories scanned: {countDirsScanned}")
+        click.echo(f"Generated cfv checksums for {countCfvFilesGenerated} directories")
 
 
 @cli.command("verify-cfv-files")
@@ -177,16 +230,19 @@ def verifyCfvFiles(ctx):
             if entry.is_dir():
                 countDirsScanned += 1
                 sha1_checksum_filepath = os.path.join(entry.path, entry.name) + SHA1_EXT
-                print(f"Verifying CFV checksum file in {entry.path} ...")
+                click.echo(f"Verifying CFV checksum file in {entry.path} ...")
                 if do_verify_checksums(entry.path, sha1_checksum_filepath):
                     countCfvFilesVerified += 1
 
     if countDirsScanned == 0:
-        print("ERROR: No sub-directories found", file=sys.stderr)
+        click.echo(
+            click.style("ERROR: No sub-directories found", fg="red", bold=True),
+            err=True
+        )
         sys.exit(1)
 
-    print(f"Tested and verified cfv checksums for {countCfvFilesVerified} directories")
-    print(f"Total no. of sub-directories scanned: {countDirsScanned}")
+    click.echo(f"Tested and verified cfv checksums for {countCfvFilesVerified} directories")
+    click.echo(f"Total no. of sub-directories scanned: {countDirsScanned}")
 
 
 if __name__ == "__main__":
