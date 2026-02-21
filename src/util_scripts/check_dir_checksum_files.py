@@ -1,5 +1,22 @@
-# given a target directory path, scan all sub-directories in that folder/path
+# /// script
+# requires-python = ">=3.14"
+# dependencies = []
+# ///
+#
+# Given a target directory path, scan all sub-directories in that folder/path
 # and highlight those ones that do not have a checksum file present in them.
+#
+# Note:
+#   1) This script has only been tested and developed for Windows OSes.
+#   2) This script depends on the external CFV windows utility package (d/l from https://cfv.sourceforge.net/)
+#   3) This is a legacy script - consider using checksum_file_tool.py instead.
+#
+# Usage with uv:
+#   uv run check_dir_checksum_files.py [-v] [--calc-checksums] DIR_PATH
+#   uv run check_dir_checksum_files.py --help
+#   uv run check_dir_checksum_files.py D:\Archive
+#   uv run check_dir_checksum_files.py -v D:\Archive
+#   uv run check_dir_checksum_files.py --calc-checksums D:\Archive
 #
 
 import argparse

@@ -1,3 +1,9 @@
+# /// script
+# requires-python = ">=3.14"
+# dependencies = [
+#     "click>=8.1.0",
+# ]
+# ///
 #
 # A utility script to scan a given root directory (dir_path) and identify
 # those sub-directories that have missing (non-existent) CFV checksum files.
@@ -6,6 +12,13 @@
 #   1) This script has only been tested and developed for Windows OSes.
 #   2) This script will not work on any other OS/platform.
 #   3) This script depends on the external CFV windows utility package (d/l from https://cfv.sourceforge.net/)
+#
+# Usage with uv:
+#   uv run checksum_file_tool.py [OPTIONS] DIR_PATH COMMAND [ARGS]...
+#   uv run checksum_file_tool.py --help
+#   uv run checksum_file_tool.py -v D:\Archive check-4-missing-cfv-files
+#   uv run checksum_file_tool.py D:\Archive generate-cfv-files
+#   uv run checksum_file_tool.py D:\Archive verify-cfv-files
 #
 # Various references for click library usage:
 #   - https://www.assemblyai.com/blog/the-definitive-guide-to-python-click/

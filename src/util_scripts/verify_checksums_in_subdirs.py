@@ -1,5 +1,21 @@
+# /// script
+# requires-python = ">=3.14"
+# dependencies = []
+# ///
+#
 # Given a target directory path, scan all sub-directories in that folder/path
 # and verify/validate the CFV style checksums file in that sub-directory.
+#
+# Note:
+#   1) This script has only been tested and developed for Windows OSes.
+#   2) This script depends on the external CFV windows utility package (d/l from https://cfv.sourceforge.net/)
+#   3) This is a legacy script - consider using checksum_file_tool.py instead.
+#
+# Usage with uv:
+#   uv run verify_checksums_in_subdirs.py [-v] DIR_PATH
+#   uv run verify_checksums_in_subdirs.py --help
+#   uv run verify_checksums_in_subdirs.py D:\Archive
+#   uv run verify_checksums_in_subdirs.py -v D:\Archive
 #
 
 import argparse
